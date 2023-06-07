@@ -77,9 +77,9 @@ V = q*Ve
 #Calculate and set velocity components to each particle
 w = (1-2*X6)*V
 
-u = pow(abs(V**2 - z**2),0.5)*((np.cos(2*pi*X7)))
+u = pow(abs(V**2 - w**2),0.5)*((np.cos(2*pi*X7)))
 
-v = pow(abs(V**2 - z**2),0.5)*((np.sin(2*pi*X7)))	
+v = pow(abs(V**2 - w**2),0.5)*((np.sin(2*pi*X7)))	
 
 
 
