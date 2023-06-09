@@ -15,6 +15,7 @@ parser.add_argument('filename', type=str, help='file name to read in')
 parser.add_argument('-n', type=int, dest='num_bins', default=100, help='Number of bins')
 parser.add_argument('-f', dest = 'outfile', default = 'nbody-velocity-plot.pdf', help = 'Output file name')
 parser.add_argument('-a', dest = 'R', default = 1, help = 'plummer radius scale factor')
+parser.add_argument('-equal', dest = 'equal', action='store_true',help = 'use equal mass bins')
 args = parser.parse_args()
 
 
@@ -24,14 +25,11 @@ s = System.read(args.filename)
 print("Binning in radial shells with logarithmic spacing", file=stderr)
 
 
-
 rmax = s.rmax + 1e-3
 rmin = s.rmin
 dr = np.log10(rmax / rmin) / args.num_bins
 
 print("  r_min = {0:6.3f}, r_max = {1:6.3f}, dr = {2:6.3f}".format(rmin, rmax,dr), file=stderr)
-
-
 
 
 # Calculate and store mean radial velocities and rms velocities
