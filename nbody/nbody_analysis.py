@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+from nbody import *
 import argparse
 from os.path import splitext
 import matplotlib.pyplot as plt
@@ -8,6 +9,7 @@ import numpy as np
 
 parser = argparse.ArgumentParser(description='Calculate the binned density profile of the N-body system.')
 parser.add_argument('filenames',nargs='*', help='file names to read in')
+parser.add_argument('-f', dest = 'outfile', default = 'analysis/analysis', help = 'output file name base')
 
 args = parser.parse_args()
 
@@ -19,14 +21,19 @@ for f in files:
 
 	os.system(f'nbody_density.py {f}')
 	
-	os.system(f'velocity.py {f}')
+	os.system(f'nbody_velocity.py {f}')
 
 
 
 for i in range(len(files)):
-	fig, axs = plt.subplots(2, constrained_layout=True)
-	fig.suptitle(f'Analysis for {args.filenames[i]}')
+
+	s = System.read(f)
+	AM = System.angular_momentum(s)
+	#E = System.potential_energy(s)+System.kinetic_energy(s)
 	
+	fig, axs = plt.subplots(2, constrained_layout=True)
+	
+	fig.suptitle(f'{splitext(args.filenames[i])[0]} AM = {AM} ')
 	
 	for ax in axs.flat:
 		ax.set(xlabel = 'log10(r)')
@@ -36,10 +43,15 @@ for i in range(len(files)):
 
 	vel_data = np.loadtxt(f'{splitext(args.filenames[i])[0]}.vel', unpack=True)
 	den_data = np.loadtxt(f'{splitext(args.filenames[i])[0]}.den', unpack=True)
+	
+	
+	#r = np.logspace(-3,3)
+
+	#vr_2 = (1/6)*(1/(1+(r/args.R)**2))**0.5
 
 	axs[0].plot(vel_data[0],vel_data[1], marker = '.',linestyle = 'None')
+	#axs[0].plot(np.log10(r),vr_2)
 	axs[1].plot(den_data[0],den_data[1],marker  = '.',linestyle = 'None')
 
-	plt.savefig(f'{args.filenames[i]}.pdf')
-	
+	plt.savefig(f'{args.outfile}{i}.pdf')
 	

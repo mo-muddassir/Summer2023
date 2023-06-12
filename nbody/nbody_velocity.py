@@ -20,66 +20,72 @@ args = parser.parse_args()
 
 
 #Read system details from source file
-s = System.read(args.filename)
+file = System.read(args.filename)
 
 print("Binning in radial shells with logarithmic spacing", file=stderr)
 
+def velocity(s):
+	rmax = s.rmax + 1e-3
+	rmin = s.rmin
+	dr = np.log10(rmax / rmin) / args.num_bins
 
-rmax = s.rmax + 1e-3
-rmin = s.rmin
-dr = np.log10(rmax / rmin) / args.num_bins
-
-print("  r_min = {0:6.3f}, r_max = {1:6.3f}, dr = {2:6.3f}".format(rmin, rmax,dr), file=stderr)
+	print("  r_min = {0:6.3f}, r_max = {1:6.3f}, dr = {2:6.3f}".format(rmin, rmax,dr), file=stderr)
 
 
-# Calculate and store mean radial velocities and rms velocities
+	# Calculate and store mean radial velocities and rms velocities
 
-mean_vr = np.zeros(args.num_bins)
+	mean_vr = np.zeros(args.num_bins)
 
-mean_vr_2 = np.zeros(args.num_bins)
+	mean_vr_2 = np.zeros(args.num_bins)
 
-bin_pop = np.zeros(args.num_bins)
+	bin_pop = np.zeros(args.num_bins)
 
-bin_vr = np.zeros(args.num_bins)
+	bin_vr = np.zeros(args.num_bins)
 
-bin_vr_2 = np.zeros(args.num_bins)
+	bin_vr_2 = np.zeros(args.num_bins)
 
-for p in s: 
+	for p in s: 
 	
 
-	r = np.sqrt(np.sum(p['position']**2))
+		r = np.sqrt(np.sum(p['position']**2))
 
-	vr = ((p['position'][0]*p['velocity'][0])+(p['position'][1]*p['velocity'][1])+(p['position'][2]*p['velocity'][2]))/r
+		vr = ((p['position'][0]*p['velocity'][0])+(p['position'][1]*p['velocity'][1])+(p['position'][2]*p['velocity'][2]))/r
 	
-	pos = int( (np.log10(r) - np.log10(rmin)) / dr)
+		pos = int( (np.log10(r) - np.log10(rmin)) / dr)
 	
-	bin_pop[pos] += 1
+		bin_pop[pos] += 1
 	
-	bin_vr[pos] += vr
+		bin_vr[pos] += vr
 	
-	bin_vr_2[pos] += vr**2
+		bin_vr_2[pos] += vr**2
 	
-radii = np.zeros(args.num_bins)
+	radii = np.zeros(args.num_bins)
 
-for i in range(args.num_bins):
-	radii[i] = np.power(10.0, np.log10(rmin) + 0.5 * dr + dr*i)
+	for i in range(args.num_bins):
+		radii[i] = np.power(10.0, np.log10(rmin) + 0.5 * dr + dr*i)
 	
-	mean_vr[i] = bin_vr[i] / bin_pop[i]
+		mean_vr[i] = bin_vr[i] / bin_pop[i]
 	
-	mean_vr_2[i] = bin_vr_2[i] / bin_pop[i]
-
-
-
-
-#Theoretical <vr^2>
-
-r = np.logspace(-3,3)
-
-vr_2 = (1/6)*(1/(1+(r/args.R)**2))**0.5
-
-
-print(System.angular_momentum(s))
+		mean_vr_2[i] = bin_vr_2[i] / bin_pop[i]
+		
 	
+
+	return radii,mean_vr_2
+
+
+#AM = System.angular_momentum(file)
+#E = System.potential_energy(file) + System.kinetic_energy(file)
+	
+
+if args.equal:
+	print("With equal mass bins")
+else:
+	radii, mean_vr_2= velocity(file)
+	
+	
+np.savetxt(splitext(args.filename)[0] + ".vel", np.transpose([np.log10(radii), mean_vr_2])) 
+
+
 #Optional: print values of <vr> and <vr^2> to console
 #total_mean = np.sum(mean_vr **2)/args.num_bins
 
@@ -87,20 +93,5 @@ print(System.angular_momentum(s))
 
 #print(f"<vr^2> = {mean_vr_2}")
 
-#print(f"<vr^2 system> = {total_mean}")
-
-
-
-
-#Save a plot of log10(r) vs <vr^2>
-
-fig = plt.figure()
-ax = fig.add_subplot(1,1,1)
-ax.plot(np.log10(r), vr_2,'.',label = 'Theoretical model')
-ax.plot(np.log10(radii),mean_vr_2,'+', label = 'Simulation')
-ax.set_title(f"<vr^2> for a sample Plummer Sphere with {len(s)} equal mass bodies")
-ax.set_xlabel("log10(r)")
-ax.set_ylabel("<vr^2>")
-ax.legend()
-plt.savefig(args.outfile)
-#plt.show()
+#print(f"<vr^2 system> = {total_mean}") 
+	
