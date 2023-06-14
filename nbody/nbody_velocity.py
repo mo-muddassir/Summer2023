@@ -22,9 +22,9 @@ args = parser.parse_args()
 #Read system details from source file
 file = System.read(args.filename)
 
-print("Binning in radial shells with logarithmic spacing", file=stderr)
 
-def velocity(s):
+
+def radial_spacing(s):
 	rmax = s.rmax + 1e-3
 	rmin = s.rmin
 	dr = np.log10(rmax / rmin) / args.num_bins
@@ -72,15 +72,61 @@ def velocity(s):
 
 	return radii,mean_vr_2
 
+def equal_mass(s):
+	rmax = s.rmax + 1e-3
+	rmin = s.rmin
+	dr = np.log10(rmax / rmin) / args.num_bins
 
-#AM = System.angular_momentum(file)
-#E = System.potential_energy(file) + System.kinetic_energy(file)
+	print("  r_min = {0:6.3f}, r_max = {1:6.3f}, dr = {2:6.3f}".format(rmin, rmax,dr), file=stderr)
 	
+	print("Binning in radial shells with equal mass spacing", file=stderr)
+    
+	num_per_bin = len(s) / args.num_bins + 1
+	s.sort_by_radius()
+    
+	rmax = s.rmax + 1e-10
+	rmin = s.rmin
+	print(f"  r_min = {rmin:6.3f}, r_max = {rmax:6.3f}", file=stderr)
+    
+	m_enc = 0.0
+	r_last = rmin
+	c = 0
+	vr_2 = 0 
+	bin_vr_2 = np.zeros(args.num_bins)
+	radii = np.zeros(args.num_bins)
+	density = np.zeros(args.num_bins)
+	mean_vr_2 = np.zeros(args.num_bins)
+    
+	for i in range(len(s)):
+		m_enc += s[i]['mass']
+		r = np.sqrt(np.sum(s[i]['position']**2))
+
+		vr_2 += np.power((((s[i]['position'][0]*s[i]['velocity'][0])+(s[i]['position'][1]*s[i]['velocity'][1])+(s[i]['position'][2]*s[i]['velocity'][2]))/r),2)
+        
+		if (i != 0 and i % num_per_bin == 0) or (i == len(s) - 1):        
+        
+			r = s.radius(i)
+			radii[c] = r_last + 0.5 * (r - r_last)
+			bin_vr_2[c] = vr_2
+			r_last = r
+			c += 1
+			m_enc = 0.0
+			vr_2 = 0 
+			
+	for i in range(args.num_bins):
+	
+		mean_vr_2[i] = bin_vr_2[i] / num_per_bin
+	
+	return radii, mean_vr_2
+	
+
 
 if args.equal:
 	print("With equal mass bins")
+	radii, mean_vr_2 = equal_mass(file)
 else:
-	radii, mean_vr_2= velocity(file)
+	print("Binning in radial shells with logarithmic spacing", file=stderr)
+	radii, mean_vr_2= radial_spacing(file)
 	
 	
 np.savetxt(splitext(args.filename)[0] + ".vel", np.transpose([np.log10(radii), mean_vr_2])) 
