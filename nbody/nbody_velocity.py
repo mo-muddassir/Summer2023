@@ -68,6 +68,12 @@ def radial_spacing(s):
 	
 		mean_vr_2[i] = bin_vr_2[i] / bin_pop[i]
 		
+	while True:
+		if radii[0] < 0.1:
+			radii = np.delete(radii, 0)
+			mean_vr_2 = np.delete(mean_vr_2,0)
+		else:
+			break
 	
 
 	return radii,mean_vr_2

@@ -25,11 +25,11 @@ args = parser.parse_args()
 
 files = args.filenames
 
-
-
 pi = np.pi
 
-r = np.logspace(-3,3)
+r = np.logspace(-1.2,3)
+
+
 
 for f in files:
 
@@ -37,9 +37,9 @@ for f in files:
 
 	os.system(f'nbody_density.py {f}')
 	
-	os.system(f'nbody_velocity.py {f} -equal')
+	os.system(f'nbody_velocity.py {f}')
 
-fig, axs = plt.subplots(2,figsize = (15,15), constrained_layout=True)
+fig, axs = plt.subplots(2,figsize = (12,12), constrained_layout=True)
 
 
 vr_2 = (1/6)*(1/(1+(r/args.R)**2))**0.5
@@ -48,20 +48,30 @@ plum_den = (3/4/pi)*(args.M/(args.R**3))*(pow((1+(r/args.R)**2),-5/2))
 axs[0].plot(np.log10(r),vr_2,label='Theoretical')
 axs[1].plot(np.log10(r), np.log10(plum_den),label='Theoretical')
 
-for i in range(len(files)):
 
-	s = System.read(args.filenames[i])
-	AM = System.angular_momentum(s)
-	E = System.potential_energy_shell(s)+System.kinetic_energy(s)
+plt.figure(facecolor='black')
+
+
+
+
+for i in range(len(files)):
 	
 	
+	axs[0].set_title('1 Million Particle Analysis',family = 'serif', fontsize = 18)
+	plt.rcParams['font.size']=11
+	plt.rcParams['font.family'] = 'serif'
 	
-	#fig.suptitle(f'{splitext(args.filenames[i])[0]} AM = {AM} E={E}')
+	axs[0].tick_params(axis='both', which='both', labelsize=14)
+	axs[1].tick_params(axis='both', which='both', labelsize=14)
 	
 	for ax in axs.flat:
-		ax.set(xlabel = 'log10(r)')
-	axs[0].set_ylabel('<vr^2>')
-	axs[1].set_ylabel('Density')
+		ax.set_xlabel('log10(r)', fontsize=16,font='serif')
+		
+	axs[0].set_ylabel('<vr^2>',fontsize = 16,family='serif')
+	axs[1].set_ylabel('Density',fontsize=16, family = 'serif')
+	
+	axs[0].set_facecolor('black')
+	axs[1].set_facecolor('black')
 
 
 	vel_data = np.loadtxt(f'{splitext(args.filenames[i])[0]}.vel', unpack=True)
@@ -69,11 +79,10 @@ for i in range(len(files)):
 
 	
 	
-	axs[0].plot(vel_data[0],vel_data[1],label = 'AM='+str(AM)+'E='+str(E))
-	
+	axs[0].plot(vel_data[0],vel_data[1],label = splitext(args.filenames[i])[0])
 	axs[0].legend()
 	
-	axs[1].plot(den_data[0],den_data[1],label = 'AM='+str(AM)+'E='+str(E))
+	axs[1].plot(den_data[0],den_data[1],label = splitext(args.filenames[i])[0])
 	axs[1].legend()
 
 

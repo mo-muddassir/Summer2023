@@ -80,8 +80,14 @@ else:
 
     rows_to_delete = []
     for i in range(len(radii)):
-        if density[i] == 0 or (args.softening != None and radii[i] < args.softening):
-            rows_to_delete.append(i)
+    	if radii[i]<0.1:
+    		rows_to_delete.append(i)
+    #for i in range(len(radii)):
+        #if density[i] == 0 or (args.softening != None and radii[i] < 0.1):
+            #rows_to_delete.append(i)
+     
+            
+
             
     radii = np.delete(radii, rows_to_delete)
     density = np.delete(density, rows_to_delete)
