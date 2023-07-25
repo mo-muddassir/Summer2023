@@ -28,6 +28,7 @@ void print_help()
     	fprintf(stderr, "   -e #        Softening length (0.1)\n");
     	fprintf(stderr, "   -a #        Opening angle (0.5)\n");
     	fprintf(stderr, "   -b #        Size of tree bucket (1)\n");
+    	fprintf(stderr, "   -m #        Max mass of BH / Total System Mass (0.01)\n");
 }
 
 void set_dump_and_exit(int sig)
@@ -53,6 +54,9 @@ int main(int argc, char *argv[])
 	struct timeb tstart2f, tstop2f;
 	float tinterval;	
 	int option;
+	double Mbh;
+	double r;
+	double Mbh_max = 0.01;
 
 	/* default input parameters */
 	sprintf(inputfile, "init.dat");
@@ -64,6 +68,7 @@ int main(int argc, char *argv[])
 	theta = 0.5;
 	eps = 0.1;
 	bucketSize = 1;
+	Mbh = 0.0; 
 
 	printf("Welcome to Dave's N-Body Code\n");
 	printf("-----------------------------\n");
@@ -75,7 +80,7 @@ int main(int argc, char *argv[])
 		exit(9);
 	} else {
 		/* process flags */
-		while ((option = getopt(argc, argv, "hi:o:t:s:a:e:b:d:")) != EOF){
+		while ((option = getopt(argc, argv, "hi:o:t:s:a:e:b:d:m:")) != EOF){
 			switch (option){
 				case 'i':
 					strncpy(inputfile, optarg, 200);
@@ -100,7 +105,10 @@ int main(int argc, char *argv[])
 					break;					
 				case 'd':
 					dt_out = atof(optarg);
-					break;		
+					break;
+				case 'm':
+					Mbh_max = atof(optarg);
+					break;	
 				case 'h':
 				case '?':
 					print_help();
@@ -119,6 +127,7 @@ int main(int argc, char *argv[])
 	printf("Theta:  %f\n", theta);
 	printf("eps:    %f\n", eps);	
 	printf("bSize:  %d\n", bucketSize);
+	printf("max BH mass:	%f\n",Mbh_max);
 	
 
 	dump_and_exit = 0;
@@ -137,11 +146,17 @@ int main(int argc, char *argv[])
 		if (step > 0)
 			AdvancePositions(particles, N, dt);
 
-		for (i = 0; i < N; i++)
+		for (i = 0; i < N; i++){
 			VECTOR_CLEAR(ACC(particles + i));
-				
+			r = sqrt(POS(particles+i)[0]*POS(particles+i)[0] + POS(particles+i)[1]*POS(particles+i)[1] +POS(particles+i)[2]*POS(particles+i)[2] + eps*eps);
+			
+			ACC(particles + i)[0] = Mbh * POS(particles+i)[0]/r/r/r;
+			ACC(particles + i)[1] = Mbh * POS(particles+i)[1]/r/r/r;
+			ACC(particles + i)[2] = Mbh * POS(particles+i)[2]/r/r/r;
+		}
+		printf("%f \n",ACC(particles)[0]);	
 		calc_forces(particles, N, eps);
-
+		
 		if (step > 0)
 			AdvanceVelocities(particles, N, 0.5 * dt);
 
@@ -174,9 +189,11 @@ int main(int argc, char *argv[])
 		    exit(1);
 	    
 	    step++;
-		t += dt; 
+		t += dt;
+		
 	    	
-		AdvanceVelocities(particles, N, 0.5 * dt);		
+		AdvanceVelocities(particles, N, 0.5 * dt);
+		Mbh += Mbh_max * t_stop;		
 	}
 
 	return 0;

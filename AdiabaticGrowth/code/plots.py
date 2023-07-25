@@ -2,12 +2,12 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 import numpy as np
 
-rc('text.latex',preamble='\\usepackage{libertine}\n\\usepackage[libertine]{newtxmath}')
-rc('font',**{'family':'serif','serif':['Linux Libertine O']}, size=18)
-rc('text', usetex=True)
+#rc('text.latex',preamble='\\usepackage{libertine}\n\\usepackage[libertine]{newtxmath}')
+#rc('font',**{'family':'serif','serif':['Linux Libertine O']}, size=18)
+#rc('text', usetex=True)
 
 data = []
-for f in ["data_m0.0000.txt", "data_m0.0001.txt", "data_m0.0010.txt",  "data_m0.0100.txt"]:
+for f in ["data_m0.0000.txt", "data_m0.0001.txt", "data_m0.0010.txt",  "data_m0.0100.txt", "0.01m_e0.05.den", "0.01m_e0.05.vel"]:
 	data.append(np.loadtxt(f))
 
 fig = plt.figure(figsize=(8, 8))
@@ -17,6 +17,7 @@ ax.loglog(data[0][:,0], data[0][:,5], color='k')
 ax.loglog(data[1][:,0], data[1][:,5], color='k')
 ax.loglog(data[2][:,0], data[2][:,5], color='k')
 ax.loglog(data[3][:,0], data[3][:,5], color='k')
+ax.loglog(data[4][:,0],data[4][:,1],color = 'red')
 ax.set_xlabel(r"$r$")
 ax.set_ylabel(r"$\rho(r)$")
 ax.set_xlim(1e-4, 300)

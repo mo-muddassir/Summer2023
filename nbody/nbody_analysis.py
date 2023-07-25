@@ -6,12 +6,12 @@ import argparse
 from os.path import splitext
 import matplotlib.pyplot as plt
 import numpy as np
-
+from math import log10
 parser = argparse.ArgumentParser(description='Calculate the binned density profile of the N-body system.')
 
 parser.add_argument('filenames',nargs='*', help='file names to read in')
 
-parser.add_argument('-f', dest = 'outfile', default = 'analysis/analysis', help = 'output file name base')
+parser.add_argument('-f', dest = 'outfile', default = 'Analysis.pdf', help = 'output file name base')
 
 parser.add_argument('-M', dest='M', default=1, type=int, help='total mass')
 
@@ -19,7 +19,11 @@ parser.add_argument('-R', dest = 'R', default = 1, type = int, help ='Plummer ra
 
 parser.add_argument('-G', dest='G', default=1, type=int, help='Gravitational Constant')
 
-parser.add_argument('-equal', dest = 'equal', action = 'store_true',help = 'Activate for equal mass binning') 
+parser.add_argument('-title', dest = 'title', default = 'Profile Analysis',help = 'Plot title') 
+
+parser.add_argument('-e', dest = 'softening', default = 0.01,help = 'softening') 
+
+
 
 args = parser.parse_args()
 
@@ -35,9 +39,9 @@ for f in files:
 
 	outfile = splitext(f)[0] + ".pdf"
 
-	os.system(f'nbody_density.py {f}')
+	os.system(f'/home/moe/research/Summer2023/nbody/nbody_density.py {f} -e {args.softening}')
 	
-	os.system(f'nbody_velocity.py {f}')
+	os.system(f'/home/moe/research/Summer2023/nbody/nbody_velocity.py {f} -e {args.softening}')
 
 fig, axs = plt.subplots(2,figsize = (12,12), constrained_layout=True)
 
@@ -57,7 +61,7 @@ plt.figure(facecolor='black')
 for i in range(len(files)):
 	
 	
-	axs[0].set_title('1 Million Particle Analysis',family = 'serif', fontsize = 18)
+	
 	plt.rcParams['font.size']=11
 	plt.rcParams['font.family'] = 'serif'
 	
@@ -65,10 +69,10 @@ for i in range(len(files)):
 	axs[1].tick_params(axis='both', which='both', labelsize=14)
 	
 	for ax in axs.flat:
-		ax.set_xlabel('log10(r)', fontsize=16,font='serif')
+		ax.set_xlabel('Log10(r)', fontsize=16,font='serif')
 		
 	axs[0].set_ylabel('<vr^2>',fontsize = 16,family='serif')
-	axs[1].set_ylabel('Density',fontsize=16, family = 'serif')
+	axs[1].set_ylabel('Log10(Density)',fontsize=16, family = 'serif')
 	
 	axs[0].set_facecolor('black')
 	axs[1].set_facecolor('black')
@@ -77,7 +81,7 @@ for i in range(len(files)):
 	vel_data = np.loadtxt(f'{splitext(args.filenames[i])[0]}.vel', unpack=True)
 	den_data = np.loadtxt(f'{splitext(args.filenames[i])[0]}.den', unpack=True)
 
-	
+	axs[0].set_title(f'{args.title}',family = 'serif', fontsize = 18)
 	
 	axs[0].plot(vel_data[0],vel_data[1],label = splitext(args.filenames[i])[0])
 	axs[0].legend()

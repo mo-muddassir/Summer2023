@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import matplotlib.pyplot as plt
 from matplotlib import rc
 import numpy as np
@@ -250,7 +251,7 @@ vr2_grid = calc_velocity_moment(r_grid, rho_grid, phi_grid, f_grid, 2, 0)
 vt2_grid = calc_velocity_moment(r_grid, rho_grid, phi_grid, f_grid, 0, 2)
 		
 mbh = 0.01
-error = 1e-3
+error = 5e-2
 
 rhostar_grid = rho_grid
 delta = 1e6
@@ -273,5 +274,5 @@ vr2star_grid = calc_velocity_moment(r_grid, rhostar_grid, phistar_grid, fstar_gr
 vt2star_grid = calc_velocity_moment(r_grid, rhostar_grid, phistar_grid, fstar_grid, 0, 2)
 
 # save it all
-np.savetxt(f"data_m{mbh:.4f}.txt", np.column_stack((r_grid, rho_grid, phi_grid, vr2_grid, vt2_grid, rhostar_grid, phistar_grid, vr2star_grid, vt2star_grid)))
+np.savetxt(f"pred0.01m_e0.05.txt", np.column_stack((r_grid, rho_grid, phi_grid, vr2_grid, vt2_grid, rhostar_grid, phistar_grid, vr2star_grid, vt2star_grid)))
 

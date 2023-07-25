@@ -7,6 +7,7 @@ import argparse
 from sys import argv
 from sys import stderr
 from os.path import splitext
+from math import log10
 
 parser = argparse.ArgumentParser(description='Calculate the binned density profile of the N-body system.')
 parser.add_argument('filename', type=str, help='file name to read in')
@@ -59,19 +60,19 @@ else:
 
     rmax = s.rmax + 1e-3
     rmin = s.rmin
-    dr = np.log10(rmax / rmin) / args.num_bins
+    dr = log10(rmax / rmin) / args.num_bins
     print("  r_min = {0:6.3f}, r_max = {1:6.3f}".format(rmin, rmax), file=stderr)
 
     density = np.zeros(args.num_bins)
     for p in s:
         r = np.sqrt(np.sum(p['position']**2))
-        pos = int( (np.log10(r) - np.log10(rmin)) / dr)
+        pos = int( (log10(r) - log10(rmin)) / dr)
         
         density[pos] += p['mass']
 
     radii = np.zeros(args.num_bins)
     for i in range(args.num_bins):
-        radii[i] = np.power(10.0, np.log10(rmin) + 0.5 * dr + dr*i)
+        radii[i] = np.power(10.0, log10(rmin) + 0.5 * dr + dr*i)
         r = np.power(10.0, dr*i) * rmin
         rp1 = np.power(10.0, dr) * r
         volume = 4.0 / 3.0 * np.pi * ( np.power(rp1, 3.0) - np.power(r, 3.0) )
@@ -80,7 +81,7 @@ else:
 
     rows_to_delete = []
     for i in range(len(radii)):
-    	if radii[i]<0.1:
+    	if radii[i]<args.softening:
     		rows_to_delete.append(i)
     #for i in range(len(radii)):
         #if density[i] == 0 or (args.softening != None and radii[i] < 0.1):

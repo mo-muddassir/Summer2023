@@ -8,6 +8,7 @@ from sys import argv
 from sys import stderr
 from os.path import splitext
 import matplotlib.pyplot as plt
+from math import log10
 
 
 parser = argparse.ArgumentParser(description='Calculate the binned density profile of the N-body system.')
@@ -16,6 +17,7 @@ parser.add_argument('-n', type=int, dest='num_bins', default=100, help='Number o
 parser.add_argument('-f', dest = 'outfile', default = 'nbody-velocity-plot.pdf', help = 'Output file name')
 parser.add_argument('-a', dest = 'R', default = 1, help = 'plummer radius scale factor')
 parser.add_argument('-equal', dest = 'equal', action='store_true',help = 'use equal mass bins')
+parser.add_argument('-e', dest = 'softening', default = 0.01 ,help = 'softening')
 args = parser.parse_args()
 
 
@@ -25,9 +27,9 @@ file = System.read(args.filename)
 
 
 def radial_spacing(s):
-	rmax = s.rmax + 1e-3
+	rmax = s.rmax + 10**-3
 	rmin = s.rmin
-	dr = np.log10(rmax / rmin) / args.num_bins
+	dr = log10(rmax / rmin) / args.num_bins
 
 	print("  r_min = {0:6.3f}, r_max = {1:6.3f}, dr = {2:6.3f}".format(rmin, rmax,dr), file=stderr)
 
@@ -43,15 +45,17 @@ def radial_spacing(s):
 	bin_vr = np.zeros(args.num_bins)
 
 	bin_vr_2 = np.zeros(args.num_bins)
+	
+	c = 0
 
 	for p in s: 
 	
-
+		c+=1
 		r = np.sqrt(np.sum(p['position']**2))
 
 		vr = ((p['position'][0]*p['velocity'][0])+(p['position'][1]*p['velocity'][1])+(p['position'][2]*p['velocity'][2]))/r
 	
-		pos = int( (np.log10(r) - np.log10(rmin)) / dr)
+		pos = int( (log10(r) - log10(rmin)) / dr)
 	
 		bin_pop[pos] += 1
 	
@@ -68,12 +72,13 @@ def radial_spacing(s):
 	
 		mean_vr_2[i] = bin_vr_2[i] / bin_pop[i]
 		
-	while True:
-		if radii[0] < 0.1:
-			radii = np.delete(radii, 0)
-			mean_vr_2 = np.delete(mean_vr_2,0)
-		else:
-			break
+	rows_to_delete = []
+	for i in range(len(radii)):
+		if radii[i]<float(args.softening):
+			rows_to_delete.append(i)
+	radii = np.delete(radii, rows_to_delete)
+	
+	mean_vr_2 = np.delete(mean_vr_2, rows_to_delete)
 	
 
 	return radii,mean_vr_2
@@ -81,7 +86,7 @@ def radial_spacing(s):
 def equal_mass(s):
 	rmax = s.rmax + 1e-3
 	rmin = s.rmin
-	dr = np.log10(rmax / rmin) / args.num_bins
+	dr = log10(rmax / rmin) / args.num_bins
 
 	print("  r_min = {0:6.3f}, r_max = {1:6.3f}, dr = {2:6.3f}".format(rmin, rmax,dr), file=stderr)
 	

@@ -31,7 +31,7 @@ if args.threed:
 else:
     ax = fig.add_subplot(111)
 
-ax.axis('off')
+#ax.axis('off')
 ax.set_aspect('equal')
 
 if args.gadget:
@@ -86,8 +86,8 @@ else:
     ax.set_xlim(args.limits[0], args.limits[1])
     ax.set_ylim(args.limits[2], args.limits[3])
 
-#ax.set_xlim(-3000, 3000)
-#ax.set_ylim(-3000, 3000)
+ax.set_xlim(-20, 20)
+ax.set_ylim(-20, 20)
 
 
 def update(fname):
@@ -135,8 +135,9 @@ if len(args.filenames) > 1:
     if args.out_file != "":
         Writer = animation.writers['imagemagick']
         writer = Writer(fps=4, bitrate=-1)
-    
+        
         ani.save(args.out_file, writer=writer, dpi = 150)
+        
     else:
         plt.show()
 else:
