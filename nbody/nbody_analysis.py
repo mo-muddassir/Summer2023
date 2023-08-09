@@ -39,9 +39,9 @@ for f in files:
 
 	outfile = splitext(f)[0] + ".pdf"
 
-	os.system(f'nbody_density.py {f}')
+	os.system(f"home/moe/research/Summer2023/nbody/nbody_density.py {f}")
 	
-	os.system(f'nbody_velocity.py {f}')
+	os.system(f"home/moe/research/Summer2023/nbody/nbody_velocity.py {f}")
 
 fig, axs = plt.subplots(2,figsize = (12,12), constrained_layout=True)
 
