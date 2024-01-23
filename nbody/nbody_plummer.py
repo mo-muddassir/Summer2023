@@ -82,9 +82,11 @@ u = pow(abs(V**2 - w**2),0.5)*((np.cos(2*pi*X7)))
 v = pow(abs(V**2 - w**2),0.5)*((np.sin(2*pi*X7)))	
 
 
-
+print(f'masses = {m}')
+print(f'total mass = {np.sum(m)}')
 #Create system with N particles, mass 1/N, positions [x,y,z], and velocity[u,v,w]	
 parts = np.zeros(args.N, dtype=System._particle_type)
+
 parts['mass'] = m
 
 parts['position'] = np.vstack((x.flatten(), y.flatten(), z.flatten())).T
