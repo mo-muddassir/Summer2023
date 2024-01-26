@@ -63,17 +63,23 @@ y = pow((r**2 - z**2),0.5)*((np.sin(2*pi*X3)))
 
 def generate_velocities(N=args.N):
 
-    # Escape velocity
-    Ve = np.sqrt(2) * np.power(1 + r**2, -0.25)
+	g = np.zeros(N)
+	for i in range(N):
+		g[i] = (q[i]**2)*((1-q[i]**2)**(7/2))
 
-    # Gaussian distribution for velocities
-    sigma = 0.2  # Adjust the width of the distribution as needed
-    velocities = np.random.normal(loc=Ve, scale=sigma, size=N)
+	#escape velocity
+	Ve = (2**0.5)*pow((1+r**2),-1/4)
 
-    # Ensure that velocities have sufficient resolution in the center
-    w = (1 - 2 * X7) * velocities
-    u = np.sqrt(np.abs(velocities**2 - w**2)) * np.cos(2 * np.pi * X7)
-    v = np.sqrt(np.abs(velocities**2 - w**2)) * np.sin(2 * np.pi * X7)
+	#individual total velocity of each particle
+	V = q*Ve
+
+
+	#Calculate and set velocity components to each particle
+	w = (1-2*X6)*V
+
+	u = pow(abs(V**2 - w**2),0.5)*((np.cos(2*pi*X7)))
+
+	v = pow(abs(V**2 - w**2),0.5)*((np.sin(2*pi*X7)))
 
     return np.vstack((u, v, w)).T	
 
