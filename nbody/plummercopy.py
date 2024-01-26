@@ -63,6 +63,12 @@ y = pow((r**2 - z**2),0.5)*((np.sin(2*pi*X3)))
 
 def generate_velocities(N=args.N):
 
+	while i<args.N:
+		var = np.random.uniform(0,0.99)
+		var2 = np.random.uniform(0,0.99)
+		if prop_check(var,var2) == True:
+			q.append(var)
+			i+=1
 	g = np.zeros(N)
 	for i in range(N):
 		g[i] = (q[i]**2)*((1-q[i]**2)**(7/2))
